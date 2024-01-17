@@ -1,0 +1,73 @@
+import requests
+from datetime import datetime, timedelta
+
+def get_noaa_data(api_token, dataset_id, start_date, end_date, lat_location, long_location):
+    base_url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data"
+    
+    # Define parameters for the API request
+    params = {
+        'datasetid': dataset_id,
+        'datatypeid': 'GSOM', # Global Summmary of the Month
+        'datatypeid': 'TAVG',  # Temperature average
+        'datatypeid': 'HUMID', # Humidity
+        'datatypeid': 'AWND',  # Average windspeed
+        # 'datatypeid': 'NORMAL_ANN', # Normals Annual/Seasonal
+        # 'datatypeid': 'AUTEMP', # Autumn Temperature
+        # 'datatypeid': 'SKY', # Sky cover and clouds
+        # 'datatypeid': 'SPTEMP', # Spring Temperature
+        # 'datatypeid': 'SUTEMP', # Summer Temperature
+        # 'datatypeid': 'WITEMP', # Winter Temperature
+        'startdate': start_date,
+        'enddate': end_date,
+        'latlocation': lat_location,
+        'longlocation': long_location,
+    }
+
+    headers = {
+        'token': api_token,
+    }
+
+    # Make the request to the NOAA API
+    response = requests.get(base_url, params=params, headers=headers)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Error: {response.status_code}")
+        return None
+
+def get_user_date_input():
+    start_date = input("Enter the start date (YYYY-MM-DD): ")
+    end_date = input("Enter the end date (YYYY-MM-DD): ")
+    lat_location = input("Enter latitude: ")
+    long_location = input ("Enter longitude: ")
+    return start_date, end_date, lat_location, long_location
+
+def main():
+    
+    api_token = 'yhAjVfuzPrrVWvoOtWHVkoMLCVjVarYf' 
+    dataset_id = 'GHCND'  # Global Historical Climatology Network - Daily
+    #location = #TODO: put in parameters as long/lat 
+
+    # Get user input for date range
+    start_date, end_date, lat_location, long_location = get_user_date_input()
+
+    data = get_noaa_data(api_token, dataset_id, start_date, end_date, lat_location, long_location)
+
+    if data:
+        print("NOAA Data:")
+        for result in data.get("results", []):
+            date = result.get("date", "")
+            monthly_avg = result.get("value", "")
+            temp_avg = result.get("value", "")
+            humidity = result.get("value", "")
+            windspeed = result.get("value", "")
+
+
+        print(f"Date: {date}, Monthly Avg: {monthly_avg}, Temperature Avg: {temp_avg}, Humidity: {humidity}, Windspeed: {windspeed}")
+        # print(data)
+    else:
+        print("Failed to retrieve data from NOAA API.")
+
+if __name__ == "__main__":
+    main()
